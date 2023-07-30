@@ -48,7 +48,11 @@ str_netfd_alloc(struct vsf_session* p_sess,
     }
     else if (retval == 0)
     {
-      die("vsf_sysutil_recv_peek: no data");
+      /* No longer die() here as it put a packet on the wire even though we
+       * believe the remote end closed. Reports of trouble to a Windows
+       * client.
+       */
+      vsf_sysutil_exit(1);
     }
     bytes_read = (unsigned int) retval;
     /* Search for the terminator */

@@ -71,6 +71,10 @@ ssl_slave(struct vsf_session* p_sess)
     }
     else if (cmd == PRIV_SOCK_DO_SSL_READ)
     {
+      if (p_sess->data_fd == -1 || p_sess->p_data_ssl == 0)
+      {
+        bug("invalid state");
+      }
       str_trunc(&data_str, VSFTP_DATA_BUFSIZE);
       ret = ssl_read_into_str(p_sess, p_sess->p_data_ssl, &data_str);
       priv_sock_send_int(p_sess->ssl_slave_fd, ret);
@@ -78,6 +82,10 @@ ssl_slave(struct vsf_session* p_sess)
     }
     else if (cmd == PRIV_SOCK_DO_SSL_WRITE)
     {
+      if (p_sess->data_fd == -1 || p_sess->p_data_ssl == 0)
+      {
+        bug("invalid state");
+      }
       priv_sock_get_str(p_sess->ssl_slave_fd, &data_str);
       ret = ssl_write(p_sess->p_data_ssl,
                       str_getbuf(&data_str),
@@ -93,6 +101,10 @@ ssl_slave(struct vsf_session* p_sess)
       }
       else
       {
+        if (p_sess->data_fd == -1 || p_sess->p_data_ssl == 0)
+        {
+          bug("invalid state");
+        }
         ret = ssl_data_close(p_sess);
         if (ret == 1)
         {

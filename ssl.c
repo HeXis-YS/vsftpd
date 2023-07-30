@@ -476,6 +476,8 @@ ssl_accept(struct vsf_session* p_sess, int fd)
 void
 ssl_comm_channel_init(struct vsf_session* p_sess)
 {
+  const struct vsf_sysutil_socketpair_retval retval =
+    vsf_sysutil_unix_stream_socketpair();
   if (p_sess->ssl_consumer_fd != -1)
   {
     bug("ssl_consumer_fd active");
@@ -484,8 +486,6 @@ ssl_comm_channel_init(struct vsf_session* p_sess)
   {
     bug("ssl_slave_fd active");
   }
-  const struct vsf_sysutil_socketpair_retval retval =
-    vsf_sysutil_unix_stream_socketpair();
   p_sess->ssl_consumer_fd = retval.socket_one;
   p_sess->ssl_slave_fd = retval.socket_two;
 }
@@ -552,7 +552,7 @@ get_ssl(struct vsf_session* p_sess, int fd)
   if (tunable_debug_ssl)
   {
     const char* p_ssl_version = SSL_get_cipher_version(p_ssl);
-    SSL_CIPHER* p_ssl_cipher = SSL_get_current_cipher(p_ssl);
+    const SSL_CIPHER* p_ssl_cipher = SSL_get_current_cipher(p_ssl);
     const char* p_cipher_name = SSL_CIPHER_get_name(p_ssl_cipher);
     X509* p_ssl_cert = SSL_get_peer_certificate(p_ssl);
     int reused = SSL_session_reused(p_ssl);

@@ -80,12 +80,14 @@ int tunable_strict_ssl_write_shutdown;
 int tunable_ssl_request_cert;
 int tunable_delete_failed_uploads;
 int tunable_implicit_ssl;
-int tunable_sandbox;
+int tunable_ptrace_sandbox;
 int tunable_require_ssl_reuse;
 int tunable_isolate;
 int tunable_isolate_network;
 int tunable_ftp_enable;
 int tunable_http_enable;
+int tunable_seccomp_sandbox;
+int tunable_allow_writeable_chroot;
 
 unsigned int tunable_accept_timeout;
 unsigned int tunable_connect_timeout;
@@ -178,7 +180,7 @@ tunables_load_defaults()
   tunable_use_localtime = 0;
   tunable_check_shell = 1;
   tunable_hide_ids = 0;
-  tunable_listen = 0;
+  tunable_listen = 1;
   tunable_port_promiscuous = 0;
   tunable_passwd_chroot_enable = 0;
   tunable_no_anon_password = 0;
@@ -218,12 +220,14 @@ tunables_load_defaults()
   tunable_ssl_request_cert = 1;
   tunable_delete_failed_uploads = 0;
   tunable_implicit_ssl = 0;
-  tunable_sandbox = 0;
+  tunable_ptrace_sandbox = 0;
   tunable_require_ssl_reuse = 1;
   tunable_isolate = 1;
   tunable_isolate_network = 1;
   tunable_ftp_enable = 1;
   tunable_http_enable = 0;
+  tunable_seccomp_sandbox = 1;
+  tunable_allow_writeable_chroot = 0;
 
   tunable_accept_timeout = 60;
   tunable_connect_timeout = 60;
