@@ -1298,3 +1298,15 @@ a spot with the v2.3.5 defensive change. Only applies to non-anonymous.
 - Remove a couple of fixed things from BUGS.
 - strlen() trunction fix -- no particular impact.
 - Apply some tidyups from mmoufid@yorku.ca.
+(vsftpd-3.0.0-pre1)
+- Fix delete_failed_uploads if there is a timeout. Report from Alejandro
+Hernández Hdez <aalejandrohdez@gmail.com>.
+- Fix other data channel bugs such as failure to log failure upon timeout.
+- Use exit codes a bit more consistently.
+- Fix bad interaction between SSL and trans_chunk_size.
+- Redo data timeout to fire properly for SSL sessions.
+- Redo idle timeout to fire properly for SSL sessions.
+- Make sure PROT_EXEC isn't allowed, thanks to Will Drewry for noticing.
+- Use 10 minutes as a max linger time just in case an alarm gets lost.
+(vsftpd-3.0.0-pre2)
+

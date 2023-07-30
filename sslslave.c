@@ -71,11 +71,16 @@ ssl_slave(struct vsf_session* p_sess)
     }
     else if (cmd == PRIV_SOCK_DO_SSL_READ)
     {
+      int size = priv_sock_get_int(p_sess->ssl_slave_fd);
+      if (size <= 0 || size > VSFTP_DATA_BUFSIZE)
+      {
+        bug("bad size");
+      }
       if (p_sess->data_fd == -1 || p_sess->p_data_ssl == 0)
       {
         bug("invalid state");
       }
-      str_trunc(&data_str, VSFTP_DATA_BUFSIZE);
+      str_trunc(&data_str, (unsigned int) size);
       ret = ssl_read_into_str(p_sess, p_sess->p_data_ssl, &data_str);
       priv_sock_send_int(p_sess->ssl_slave_fd, ret);
       priv_sock_send_str(p_sess->ssl_slave_fd, &data_str);

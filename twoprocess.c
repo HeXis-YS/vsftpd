@@ -52,16 +52,15 @@ handle_sigchld(void* duff)
   /* Child died, so we'll do the same! Report it as an error unless the child
    * exited normally with zero exit code
    */
-  if (vsf_sysutil_retval_is_error(vsf_sysutil_wait_get_retval(&wait_retval)) ||
-      !vsf_sysutil_wait_exited_normally(&wait_retval) ||
-      vsf_sysutil_wait_get_exitcode(&wait_retval) != 0)
-  { 
+  if (vsf_sysutil_retval_is_error(vsf_sysutil_wait_get_retval(&wait_retval)))
+  {
+    die("waiting for child");
+  }
+  else if (!vsf_sysutil_wait_exited_normally(&wait_retval))
+  {
     die("child died");
   }
-  else
-  {
-    vsf_sysutil_exit(0);
-  }
+  vsf_sysutil_exit(0);
 }
 
 static void

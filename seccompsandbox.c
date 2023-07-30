@@ -18,7 +18,6 @@
 #include "utility.h"
 
 #include <errno.h>
-#include <signal.h>
 
 #include <netinet/in.h>
 
@@ -31,6 +30,8 @@
 #include <linux/filter.h>
 
 #include <asm/unistd.h>
+
+/* #define DEBUG_SIGSYS 1 */
 
 #ifndef PR_SET_NO_NEW_PRIVS
   #define PR_SET_NO_NEW_PRIVS 36
@@ -45,6 +46,18 @@
 #endif
 
 #define kMaxSyscalls 100
+
+#ifdef DEBUG_SIGSYS
+
+#include <signal.h>
+#include <string.h>
+
+void
+handle_sigsys(int sig)
+{
+  (void) sig;
+}
+#endif
 
 static const int kOpenFlags =
     O_CREAT|O_EXCL|O_APPEND|O_NONBLOCK|O_DIRECTORY|O_CLOEXEC|O_LARGEFILE;
@@ -238,9 +251,11 @@ seccomp_sandbox_setup_base()
   allow_nr(__NR_read);
   allow_nr(__NR_write);
 
-  /* Always needed for memory management. */
-  allow_nr_1_arg_match(__NR_mmap, 4, MAP_PRIVATE|MAP_ANON);
-  allow_nr(__NR_mprotect);
+  /* Needed for memory management. */
+  allow_nr_2_arg_match(__NR_mmap,
+                       3, PROT_READ|PROT_WRITE,
+                       4, MAP_PRIVATE|MAP_ANON);
+  allow_nr_1_arg_mask(__NR_mprotect, 3, PROT_READ);
   allow_nr(__NR_brk);
 
   /* Misc simple low-risk calls. */
@@ -561,8 +576,13 @@ seccomp_sandbox_lockdown()
   p_filter->code = BPF_RET+BPF_K;
   p_filter->jt = 0;
   p_filter->jf = 0;
+#ifdef DEBUG_SIGSYS
+  /* SECCOMP_RET_TRAP */
+  p_filter->k = 0x00030000;
+#else
   /* SECCOMP_RET_KILL */
   p_filter->k = 0;
+#endif
 
   ret = prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
   if (ret != 0)
@@ -579,6 +599,15 @@ seccomp_sandbox_lockdown()
   {
     return;
   }
+
+#ifdef DEBUG_SIGSYS
+  {
+    struct sigaction sa;
+    memset(&sa, '\0', sizeof(sa));
+    sa.sa_handler = handle_sigsys;
+    sigaction(SIGSYS, &sa, NULL);
+  }
+#endif
 
   ret = prctl(PR_SET_SECCOMP, 2, &prog, 0, 0);
   if (ret != 0)

@@ -171,7 +171,7 @@ ssl_control_handshake(struct vsf_session* p_sess)
     /* Technically, we shouldn't leak such detailed error messages. */
     str_append_text(&err_str, get_ssl_error());
     vsf_cmdio_write_str(p_sess, FTP_TLS_FAIL, &err_str);
-    vsf_sysutil_exit(0);
+    vsf_sysutil_exit(1);
   }
   p_sess->control_use_ssl = 1;
 }

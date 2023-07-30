@@ -42,6 +42,10 @@ vsf_privop_get_ftp_port_sock(struct vsf_session* p_sess,
   int i;
   int s = vsf_sysutil_get_ipsock(p_sess->p_local_addr);
   int port = 0;
+  if (p_sess->pasv_listen_fd != -1)
+  {
+    die("listed fd is active?");
+  }
   if (vsf_sysutil_is_port_reserved(remote_port))
   {
     die("Illegal port request");
