@@ -2,7 +2,7 @@
 # Cheesy hacky location of additional link libraries.
 
 locate_library() { [ ! "$1*" = "`echo $1*`" ]; }
-find_func() { egrep $1 $2 >/dev/null; }
+find_func() { grep -E $1 $2 >/dev/null; }
 
 if find_func hosts_access tcpwrap.o; then
   echo "-lwrap";
