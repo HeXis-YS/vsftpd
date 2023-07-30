@@ -17,7 +17,7 @@ of the fork(), exec(), ELF loader startup, etc.
 It is not all good news, of course. Potential sources of poor performance
 include
 
-1) Overhead of two processes per session (in common configurations).
+1) Overhead of two processes per session (in some common configurations).
 
 2) Excessive heap usage hidden behind the string API.
 

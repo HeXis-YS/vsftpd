@@ -60,6 +60,9 @@ locate_library /usr/lib/libpam.sl && echo "-lpam";
 # For older HP-UX...
 locate_library /usr/lib/libsec.sl && echo "-lsec";
 
+# AIX ends shared libraries with .a
+locate_library /usr/lib/libpam.a && echo "-lpam";
+
 # Look for libcap (capabilities)
 locate_library /lib/libcap.so /usr/lib/libcap.so && echo "-lcap";
 

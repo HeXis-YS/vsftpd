@@ -545,3 +545,44 @@ Ah, the wonderful psychology of release numbers
 1.0.1 packaged
 --------------
 
+- Fix .spec files to use /usr/local/sbin not /usr/sbin, noted by Bill Unruh
+<unruh@physics.ubc.ca>.
+- Small doc tweaks and improvements(?)
+- Add COPYING, the GNU GPL version 2.
+- Add use_localtime config option to override the use of GMT times.
+- Add tunable_check_shell (default YES) so people can disable this if they
+are not using PAM.
+- AIX 5.1 build support, thanks to Jan-Frode Myklebust
+<janfrode@parallab.uib.no>.
+- Add "hide_ids" option to show user/group in directory listings as "ftp".
+Request from Solar.
+- Use the seemingly more portable setreuid() and setregid(), poxy HP.
+- Use status 550 instead of 500 for known but disabled commands.
+- Rename "dirchange.[ch]" to "banner.[ch]".
+- Multiline connect banner support via "banner_file" config option.
+- Minor error message changes.
+- Add more FAQ entries.
+- Add patch to specify PASV address - thanks to Mike McLean <mikem@redhat.com>.
+- Drop the 2.4.0 kernel warning file
+- Rudimentary standalone listener support - to be expanded in a later release.
+- If sendfile() returns EINVAL just fall back to normal routines - handles
+non-pagecache backed files.
+- Add "port_promiscuous" setting - should help enabling FXP.
+- Modify anon_root and local_root to change directory _before_ applying the
+chroot().
+- Open all files O_NONBLOCK to avoid pipes blocking on open.
+- Support wu-ftpd style per-user chroot() via /./ in /etc/passwd HOMEDIR.
+- Add SIGHUP support to new built in listener.
+- Per-user config overrides, via "user_config_dir" - woohoo!
+- Warning fixes, i.e. change "index" to "indexx" thanks to Olaf Kirch
+<okir@suse.de>.
+- Make sure the standalone daemon doesn't leak zombies!
+- Supposedly fix kernel messages about MSG_PEEK race - thanks to advice from
+Alexey <kuznet@ms2.inr.ac.ru>.
+- Add global client limit for standalone mode.
+- Add username that failed when we die with str_getpwnam.
+- Add a bunch of documentation under EXAMPLES.
+
+At this point: 1.1.0 package released
+-------------------------------------
+

@@ -12,6 +12,9 @@ struct mystr;
  * p_user_str     - the name of the user to become
  * p_dir_str      - the directory to chdir() and possibly chroot() to.
  *                  (if NULL, the user's home directory is used)
+ * p_ext_dir_str  - the directory to chdir() and possibly chroot() to,
+ *                  applied in addition to the directory calculated by
+ *                  p_user_str and p_dir_str.
  * caps           - bitmap of capabilities to adopt. NOTE, if the underlying
  *                  OS does not support capabilities as a non-root user, and
  *                  the capability bitset is non-empty, then root privileges
@@ -28,6 +31,7 @@ struct mystr;
 
 void vsf_secutil_change_credentials(const struct mystr* p_user_str,
                                     const struct mystr* p_dir_str,
+                                    const struct mystr* p_ext_dir_str,
                                     unsigned int caps, unsigned int options);
 #endif /* VSF_SECUTIL_H */
 

@@ -2,6 +2,7 @@
 CC 	=	gcc
 INSTALL	=	install
 IFLAGS  = -idirafter dummyinc
+#CFLAGS = -g
 CFLAGS	=	-O2 -Wall -W -Wshadow #-pedantic -Werror -Wconversion
 
 LIBS	=	`./vsf_findlibs.sh`
@@ -10,8 +11,8 @@ LINK	=	-Wl,-s
 OBJS	=	main.o utility.o prelogin.o ftpcmdio.o postlogin.o privsock.o \
 		tunables.o ftpdataio.o secbuf.o ls.o \
 		postprivparent.o logging.o str.o netstr.o sysstr.o strlist.o \
-    dirchange.o filestr.o parseconf.o secutil.o \
-    ascii.o oneprocess.o twoprocess.o privops.o \
+    banner.o filestr.o parseconf.o secutil.o \
+    ascii.o oneprocess.o twoprocess.o privops.o standalone.o \
     sysutil.o sysdeputil.o
 
 .c.o:

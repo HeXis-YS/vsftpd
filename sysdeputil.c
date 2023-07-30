@@ -149,7 +149,7 @@ static int s_zero_fd = -1;
 
 /* File private functions/variables */
 static int do_sendfile(const int out_fd, const int in_fd,
-                       long* p_offset, unsigned int num_send);
+                       unsigned int num_send, filesize_t start_pos);
 static void vsf_sysutil_setproctitle_internal(const char* p_text);
 static struct mystr s_proctitle_prefix_str;
 
@@ -168,17 +168,20 @@ vsf_sysdep_check_auth(const struct mystr* p_user_str,
     return 0;
   }
   #ifdef VSF_SYSDEP_HAVE_USERSHELL
-  while ((p_shell = getusershell()) != NULL)
+  if (tunable_check_shell)
   {
-    if (!vsf_sysutil_strcmp(p_shell, p_pwd->pw_shell))
+    while ((p_shell = getusershell()) != NULL)
     {
-      break;
+      if (!vsf_sysutil_strcmp(p_shell, p_pwd->pw_shell))
+      {
+        break;
+      }
     }
-  }
-  endusershell();
-  if (p_shell == NULL)
-  {
-    return 0;
+    endusershell();
+    if (p_shell == NULL)
+    {
+      return 0;
+    }
   }
   #endif
   #ifdef VSF_SYSDEP_HAVE_SHADOW
@@ -484,54 +487,55 @@ vsf_sysdep_adopt_capabilities(unsigned int caps)
 
 int
 vsf_sysutil_sendfile(const int out_fd, const int in_fd,
-                     unsigned long* p_offset, unsigned long num_send,
+                     filesize_t* p_offset, filesize_t num_send,
                      unsigned int max_chunk)
 {
   /* Grr - why is off_t signed? */
-  long real_offset = *p_offset;
-  if (real_offset < 0)
+  if (*p_offset < 0 || num_send < 0)
   {
-    die("invalid offset in vsf_sysutil_sendfile");
+    die("invalid offset or send count in vsf_sysutil_sendfile");
+  }
+  if (max_chunk == 0)
+  {
+    max_chunk = INT_MAX;
   }
   while (num_send > 0)
   {
     int retval;
     unsigned int send_this_time;
-    /* For 64-bit platforms */
-    if (num_send > INT_MAX)
+    if (num_send > max_chunk)
     {
-      send_this_time = INT_MAX;
+      send_this_time = max_chunk;
     }
     else
     {
       send_this_time = (unsigned int) num_send;
     }
-    if (max_chunk != 0 && send_this_time > max_chunk)
-    {
-      send_this_time = max_chunk;
-    }
-    retval = do_sendfile(out_fd, in_fd, &real_offset, send_this_time);
-    if (real_offset < 0)
+    /* Keep input file position in line with sendfile() calls */
+    vsf_sysutil_lseek_to(in_fd, *p_offset);
+    retval = do_sendfile(out_fd, in_fd, send_this_time, *p_offset);
+    if (*p_offset < 0)
     {
       die("invalid offset returned in vsf_sysutil_sendfile");
     }
-    *p_offset = real_offset;
     if (vsf_sysutil_retval_is_error(retval) || retval == 0)
     {
       return retval;
     }
-    num_send -= (unsigned long) retval;
+    num_send -= retval;
+    *p_offset += retval;
   }
   return 0;
 }
 
 static int do_sendfile(const int out_fd, const int in_fd,
-                       long* p_offset, unsigned int num_send)
+                       unsigned int num_send, filesize_t start_pos)
 {
   /* Probably should one day be shared with instance in ftpdataio.c */
   static char* p_recvbuf;
   unsigned int total_written = 0;
   int retval;
+  (void) start_pos;
 #if defined(VSF_SYSDEP_HAVE_LINUX_SENDFILE) || \
     defined(VSF_SYSDEP_HAVE_FREEBSD_SENDFILE) || \
     defined(VSF_SYSDEP_HAVE_HPUX_SENDFILE)
@@ -543,27 +547,24 @@ static int do_sendfile(const int out_fd, const int in_fd,
       do
       {
   #ifdef VSF_SYSDEP_HAVE_LINUX_SENDFILE
-        retval = sendfile(out_fd, in_fd, p_offset, num_send);
+        retval = sendfile(out_fd, in_fd, NULL, num_send);
   #elif defined(VSF_SYSDEP_HAVE_FREEBSD_SENDFILE)
         {
+          /* XXX - start_pos will truncate on 32-bit machines - can we
+           * say "start from current pos"?
+           */
           off_t written = 0;
-          retval = sendfile(in_fd, out_fd, *p_offset, num_send, NULL,
+          retval = sendfile(in_fd, out_fd, start_pos, num_send, NULL,
                             &written, 0);
           /* Translate to Linux-like retval */
           if (written > 0)
           {
             retval = (int) written;
-            *p_offset += retval;
           }
         }
   #else /* must be VSF_SYSDEP_HAVE_HPUX_SENDFILE */
         {
-          retval = sendfile(out_fd, in_fd, *p_offset, num_send, NULL, 0);
-          /* Translate to Linux-like retval */
-          if (retval > 0)
-          {
-            *p_offset += retval;
-          }
+          retval = sendfile(out_fd, in_fd, start_pos, num_send, NULL, 0);
         }
   #endif /* VSF_SYSDEP_HAVE_LINUX_SENDFILE */
         vsf_sysutil_check_pending_actions(kVSFSysUtilIO, retval, out_fd);
@@ -579,11 +580,16 @@ static int do_sendfile(const int out_fd, const int in_fd,
           s_runtime_sendfile_works = 1;
         }
       }
-      if (s_runtime_sendfile_works)
+      if (s_runtime_sendfile_works &&
+          vsf_sysutil_get_error() != kVSFSysUtilErrINVAL)
       {
         return retval;
       }
-      /* Fall thru to normal implementation. We won't check again. */
+      /* Fall thru to normal implementation. We won't check again. NOTE -
+       * also falls through if sendfile() is OK but it returns EINVAL. For
+       * Linux this means the file was not page cache backed. Original
+       * complaint was trying to serve files from an NTFS filesystem!
+       */
     }
   }
 #endif /* VSF_SYSDEP_HAVE_LINUX_SENDFILE || VSF_SYSDEP_HAVE_FREEBSD_SENDFILE */
@@ -610,7 +616,6 @@ static int do_sendfile(const int out_fd, const int in_fd,
       return -1;
     }
     num_read = (unsigned int) retval;
-    *p_offset += num_read;
     retval = vsf_sysutil_write_loop(out_fd, p_recvbuf, num_read);
     if (retval < 0)
     {
