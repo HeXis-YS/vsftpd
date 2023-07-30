@@ -59,6 +59,8 @@ extern const char* tunable_chroot_list_file;
 extern const char* tunable_pam_service_name;
 extern const char* tunable_guest_username;
 extern const char* tunable_userlist_file;
+extern const char* tunable_anon_root;
+extern const char* tunable_local_root;
 
 #endif /* VSF_TUNABLES_H */
 

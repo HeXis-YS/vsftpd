@@ -4,13 +4,16 @@ CRITICAL
 NOT SO CRITICAL
 ===============
 
+- status 500 instead of 550 for denied commands is confusing some clients
+- separate upload/download max rates
+- select() is assuming Linux behaviour (not threatening stability)
 - IPv6 support
-- "make install" should install man pages
+- multiline support in welcome banner
 
 ON THE BACK BURNER
 ==================
 
-- "Minimal" build support
+- transfer stats
 - Small race: signal might come in just before we start a blocking call
 - Support for "welcome.msg" on initial connection
 - wtmp support
@@ -25,3 +28,5 @@ NOT PLANNED
 - telnet strings (no demand)
 - better pattern matching in "ls" (no demand)
 - standalone support (no demand, connections not a bottleneck)
+- "Minimal" build support
+

@@ -1703,6 +1703,62 @@ vsf_sysutil_setgid_numeric(int gid)
   }
 }
 
+int
+vsf_sysutil_geteuid(void)
+{
+  int retval = geteuid();
+  if (retval < 0)
+  {
+    die("geteuid");
+  }
+  return retval;
+}
+
+int
+vsf_sysutil_getegid(void)
+{
+  int retval = getegid();
+  if (retval < 0)
+  {
+    die("getegid");
+  }
+  return retval;
+}
+
+void
+vsf_sysutil_seteuid(const struct vsf_sysutil_user* p_user)
+{
+  const struct passwd* p_passwd = (const struct passwd*) p_user;
+  vsf_sysutil_seteuid_numeric(p_passwd->pw_uid);
+}
+
+void
+vsf_sysutil_setegid(const struct vsf_sysutil_user* p_user)
+{
+  const struct passwd* p_passwd = (const struct passwd*) p_user;
+  vsf_sysutil_setegid_numeric(p_passwd->pw_gid);
+}
+
+void
+vsf_sysutil_seteuid_numeric(int uid)
+{
+  int retval = seteuid(uid);
+  if (retval != 0)
+  {
+    die("seteuid");
+  }
+}
+
+void
+vsf_sysutil_setegid_numeric(int gid)
+{
+  int retval = setegid(gid);
+  if (retval != 0)
+  {
+    die("setegid");
+  }
+}
+
 void
 vsf_sysutil_clear_supp_groups(void)
 {

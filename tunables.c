@@ -63,4 +63,6 @@ const char* tunable_chroot_list_file = "/etc/vsftpd.chroot_list";
 const char* tunable_pam_service_name = "ftp";
 const char* tunable_guest_username = "ftp";
 const char* tunable_userlist_file = "/etc/vsftpd.user_list";
+const char* tunable_anon_root = 0;
+const char* tunable_local_root = 0;
 

@@ -101,6 +101,8 @@ parseconf_str_array[] =
   { "pam_service_name", &tunable_pam_service_name },
   { "guest_username", &tunable_guest_username },
   { "userlist_file", &tunable_userlist_file },
+  { "anon_root", &tunable_anon_root },
+  { "local_root", &tunable_local_root },
   { 0, 0 }
 };
 

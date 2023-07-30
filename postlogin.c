@@ -66,11 +66,19 @@ process_post_login(struct vsf_session* p_sess)
   {
     vsf_sysutil_set_umask(tunable_anon_umask);
     p_sess->bw_rate_max = tunable_anon_max_rate;
+    if (tunable_anon_root != 0)
+    {
+      (void) vsf_sysutil_chdir(tunable_anon_root);
+    }
   }
   else
   {
     vsf_sysutil_set_umask(tunable_local_umask);
     p_sess->bw_rate_max = tunable_local_max_rate;
+    if (tunable_local_root != 0)
+    {
+      (void) vsf_sysutil_chdir(tunable_local_root);
+    }
   }
   if (tunable_async_abor_enable)
   {
@@ -404,11 +412,13 @@ handle_pasv(struct vsf_session* p_sess)
 static void
 handle_retr(struct vsf_session* p_sess)
 {
+  static struct mystr s_mark_str;
   static struct vsf_sysutil_statbuf* s_p_statbuf;
   struct vsf_transfer_ret trans_ret;
   int retval;
   int remote_fd;
   int opened_file;
+  int is_ascii = 0;
   unsigned long offset = p_sess->restart_pos;
   p_sess->restart_pos = 0;
   if (!pasv_active(p_sess) && !port_active(p_sess))
@@ -456,19 +466,24 @@ handle_retr(struct vsf_session* p_sess)
   vsf_log_start_entry(p_sess, kVSFLogEntryDownload);
   str_copy(&p_sess->log_str, &p_sess->ftp_arg_str);
   prepend_path_to_filename(&p_sess->log_str);
+  str_alloc_text(&s_mark_str, "Opening ");
   if (tunable_ascii_download_enable && p_sess->is_ascii)
   {
-    vsf_cmdio_write(p_sess, FTP_DATACONN,
-                    "Here comes the data. WARNING - ASCII.");
-    trans_ret = vsf_ftpdataio_transfer_file(p_sess, remote_fd,
-                                            opened_file, 0, 1);
+    str_append_text(&s_mark_str, "ASCII");
+    is_ascii = 1;
   }
   else
   {
-    vsf_cmdio_write(p_sess, FTP_DATACONN, "Here comes the data.");
-    trans_ret = vsf_ftpdataio_transfer_file(p_sess, remote_fd,
-                                            opened_file, 0, 0);
+    str_append_text(&s_mark_str, "BINARY");
   }
+  str_append_text(&s_mark_str, " mode data connection for ");
+  str_append_str(&s_mark_str, &p_sess->ftp_arg_str);
+  str_append_text(&s_mark_str, " (");
+  str_append_ulong(&s_mark_str, vsf_sysutil_statbuf_get_size(s_p_statbuf));
+  str_append_text(&s_mark_str, " bytes).");
+  vsf_cmdio_write_str(p_sess, FTP_DATACONN, &s_mark_str);
+  trans_ret = vsf_ftpdataio_transfer_file(p_sess, remote_fd,
+                                          opened_file, 0, is_ascii);
   p_sess->transfer_size = trans_ret.transferred;
   retval = dispose_remote_transfer_fd(p_sess);
   /* Log _after_ the blocking dispose call, so we get transfer times right */
@@ -696,6 +711,8 @@ handle_upload_common(struct vsf_session* p_sess, int is_append)
   int new_file_fd;
   int remote_fd;
   int retval;
+  unsigned long offset = p_sess->restart_pos;
+  p_sess->restart_pos = 0;
   if (!pasv_active(p_sess) && !port_active(p_sess))
   {
     vsf_cmdio_write(p_sess, FTP_BADSENDCONN, "Use PORT or PASV first.");
@@ -712,7 +729,7 @@ handle_upload_common(struct vsf_session* p_sess, int is_append)
   else
   {
     /* For non-anonymous, allow open() to overwrite or append existing files */
-    if (!is_append)
+    if (!is_append && offset == 0)
     {
       new_file_fd = str_create_overwrite(&p_sess->ftp_arg_str);
     }
@@ -737,6 +754,11 @@ handle_upload_common(struct vsf_session* p_sess, int is_append)
     {
       vsf_two_process_chown_upload(p_sess, new_file_fd);
     }
+  }
+  if (!is_append && offset != 0)
+  {
+    /* XXX - warning, allows seek past end of file! Check for seek > size? */
+    (void) vsf_sysutil_lseek_to(new_file_fd, offset);
   }
   remote_fd = get_remote_transfer_fd(p_sess);
   if (vsf_sysutil_retval_is_error(remote_fd))

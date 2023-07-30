@@ -105,7 +105,8 @@ drop_all_privs(void)
     }
     vsf_sysutil_free(p_statbuf);
   }
-  vsf_secutil_change_credentials(&user_str, &dir_str, 1, 0, 0);
+  vsf_secutil_change_credentials(&user_str, &dir_str, 0,
+                                 VSF_SECUTIL_OPTION_CHROOT);
   str_free(&user_str);
   str_free(&dir_str);
 }
@@ -241,10 +242,15 @@ common_do_login(struct vsf_session* p_sess, const struct mystr* p_user_str,
   priv_sock_send_result(p_sess, PRIV_SOCK_RESULT_OK);
   (void) vsf_sysutil_wait();
   vsf_sysutil_install_async_sighandler(kVSFSysUtilSigCHLD, handle_sigchld);
-  newpid = vsf_sysutil_fork();  
+  newpid = vsf_sysutil_fork(); 
   if (newpid == 0)
   {
     struct mystr guest_user_str = INIT_MYSTR;
+    unsigned int secutil_option = VSF_SECUTIL_OPTION_USE_GROUPS;
+    if (do_chroot)
+    {
+      secutil_option |= VSF_SECUTIL_OPTION_CHROOT;
+    }
     /* Child - drop privs and start proper FTP! */
     if (tunable_guest_enable && !anon)
     {
@@ -256,7 +262,11 @@ common_do_login(struct vsf_session* p_sess, const struct mystr* p_user_str,
        */
       anon = 1;
     }
-    vsf_secutil_change_credentials(p_user_str, 0, do_chroot, 1, 0);
+    if (!anon)
+    {
+      secutil_option |= VSF_SECUTIL_OPTION_CHANGE_EUID;
+    }
+    vsf_secutil_change_credentials(p_user_str, 0, 0, secutil_option);
     str_free(&guest_user_str);
     /* Guard against the config error of having the anonymous ftp tree owned
      * by the user we are running as

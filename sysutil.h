@@ -268,9 +268,15 @@ void vsf_sysutil_qsort(void* p_base, unsigned int num_elem,
 /* Credentials handling */
 int vsf_sysutil_running_as_root(void);
 void vsf_sysutil_setuid(const struct vsf_sysutil_user* p_user);
-void vsf_sysutil_setuid_numeric(int uid);
 void vsf_sysutil_setgid(const struct vsf_sysutil_user* p_user);
+void vsf_sysutil_setuid_numeric(int uid);
 void vsf_sysutil_setgid_numeric(int gid);
+int vsf_sysutil_geteuid(void);
+int vsf_sysutil_getegid(void);
+void vsf_sysutil_seteuid(const struct vsf_sysutil_user* p_user);
+void vsf_sysutil_setegid(const struct vsf_sysutil_user* p_user);
+void vsf_sysutil_seteuid_numeric(int uid);
+void vsf_sysutil_setegid_numeric(int gid);
 void vsf_sysutil_clear_supp_groups(void);
 void vsf_sysutil_initgroups(const struct vsf_sysutil_user* p_user);
 void vsf_sysutil_chroot(const char* p_root_path);

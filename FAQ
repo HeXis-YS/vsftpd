@@ -1,0 +1,7 @@
+vsftpd frequently asked questions!!
+-----------------------------------
+
+Q) Does vsftpd support a limit on the number of users connected?
+A) Yes, indirectly. vsftpd is an inetd-based service. If use the popular
+"xinetd" as your inetd, this supports per-service per-IP connection limits.
+

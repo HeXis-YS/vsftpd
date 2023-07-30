@@ -343,6 +343,12 @@ Default: 0 (use any port)
 Below is a list of string options.
 
 .TP
+.B anon_root
+This option represents a directory which vsftpd will try to change into
+after an anonymous login. Failure is silently ignored.
+
+Default: (none)
+.TP
 .B banned_email_file
 This option is the name of a file containing a list of anonymous e-mail
 passwords which are not permitted. This file is consulted if the option
@@ -389,6 +395,12 @@ This string option allows you to override the greeting banner displayed
 by vsftpd when a connection first comes in.
 
 Default: (none - default vsftpd banner is displayed)
+.TP
+.B local_root
+This option represents a directory which vsftpd will try to change into
+after a local (i.e. non-anonymous) login. Failure is silently ignored.
+
+Default: (none)
 .TP
 .B message_file
 This option is the name of the file we look for when a new directory is
