@@ -284,7 +284,7 @@ tunables_load_defaults()
   install_str_setting("/usr/share/ssl/certs/vsftpd.pem",
                       &tunable_rsa_cert_file);
   install_str_setting(0, &tunable_dsa_cert_file);
-  install_str_setting("DES-CBC3-SHA", &tunable_ssl_ciphers);
+  install_str_setting("AES128-SHA:DES-CBC3-SHA", &tunable_ssl_ciphers);
   install_str_setting(0, &tunable_rsa_private_key_file);
   install_str_setting(0, &tunable_dsa_private_key_file);
   install_str_setting(0, &tunable_ca_certs_file);

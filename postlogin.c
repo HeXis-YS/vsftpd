@@ -100,7 +100,11 @@ process_post_login(struct vsf_session* p_sess)
     bug("should not be reached");
   }
 
-  if (tunable_async_abor_enable)
+  /* Don't support async ABOR if we have an SSL channel. The spec says SHOULD
+   * NOT, and I think there are synchronization issues between command and
+   * data reads.
+   */
+  if (tunable_async_abor_enable && !p_sess->control_use_ssl)
   {
     vsf_sysutil_install_sighandler(kVSFSysUtilSigURG, handle_sigurg, p_sess, 0);
     vsf_sysutil_activate_sigurg(VSFTP_COMMAND_FD);

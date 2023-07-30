@@ -5,7 +5,7 @@ CRITICAL
 NOT SO CRITICAL
 ===============
 
-- SIGURG not working for SSL?
+- ABOR handling broken for SSL connections (does any client actually use it?)
 - Add -Wconversion
 - Don't leak SSL private key to compromised process? May be impossible. We'll
 see, would be an interesting security story.

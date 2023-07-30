@@ -1309,4 +1309,17 @@ Hernández Hdez <aalejandrohdez@gmail.com>.
 - Make sure PROT_EXEC isn't allowed, thanks to Will Drewry for noticing.
 - Use 10 minutes as a max linger time just in case an alarm gets lost.
 (vsftpd-3.0.0-pre2)
+- Change PR_SET_NO_NEW_PRIVS define, from Kees Cook.
+- Add AES128-SHA to default SSL cipher suites for FileZilla compatibility.
+Unfortunately the default vsftpd SSL confiuration still doesn't fully work
+with FileZilla, because FileZilla has a data connection security problem:
+no client certificate presentation and no session reuse. At least the error
+message is now very clear.
+- Add restart_syscall to seccomp policy. Triggers reliably if you strace whilst
+a data transfer is in progress.
+- Fix delete_failed_uploads for anonymous sessions.
+- Don't listen for urgent data if the control connection is SSL, due to possible
+protocol synchronization issues.
 
+At this point: v3.0.0 released!
+===============================

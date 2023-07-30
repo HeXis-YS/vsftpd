@@ -34,7 +34,7 @@
 /* #define DEBUG_SIGSYS 1 */
 
 #ifndef PR_SET_NO_NEW_PRIVS
-  #define PR_SET_NO_NEW_PRIVS 36
+  #define PR_SET_NO_NEW_PRIVS 38
 #endif
 
 #ifndef __NR_openat
@@ -260,6 +260,7 @@ seccomp_sandbox_setup_base()
 
   /* Misc simple low-risk calls. */
   allow_nr(__NR_rt_sigreturn); /* Used to handle SIGPIPE. */
+  allow_nr(__NR_restart_syscall);
   allow_nr(__NR_close);
 
   /* Always need to be able to exit ! */
@@ -411,9 +412,14 @@ seccomp_sandbox_setup_postlogin(const struct vsf_session* p_sess)
     {
       allow_nr(__NR_mkdir);
     }
-    if (!is_anon || tunable_anon_other_write_enable)
+    if (!is_anon ||
+        tunable_anon_other_write_enable ||
+        tunable_delete_failed_uploads)
     {
       allow_nr(__NR_unlink);
+    }
+    if (!is_anon || tunable_anon_other_write_enable)
+    {
       allow_nr(__NR_rmdir);
       allow_nr(__NR_rename);
       allow_nr(__NR_ftruncate);
