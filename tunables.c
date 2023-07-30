@@ -142,6 +142,7 @@ const char* tunable_email_password_file;
 const char* tunable_rsa_cert_file;
 const char* tunable_dsa_cert_file;
 const char* tunable_ssl_ciphers;
+const char* tunable_ssl_ciphers_tlsv13;
 const char* tunable_rsa_private_key_file;
 const char* tunable_dsa_private_key_file;
 const char* tunable_ca_certs_file;
@@ -292,6 +293,7 @@ tunables_load_defaults()
                       &tunable_rsa_cert_file);
   install_str_setting(0, &tunable_dsa_cert_file);
   install_str_setting("ECDHE-RSA-AES256-GCM-SHA384", &tunable_ssl_ciphers);
+  install_str_setting("TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256", &tunable_ssl_ciphers_tlsv13);
   install_str_setting(0, &tunable_rsa_private_key_file);
   install_str_setting(0, &tunable_dsa_private_key_file);
   install_str_setting(0, &tunable_ca_certs_file);

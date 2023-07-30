@@ -135,6 +135,11 @@ ssl_init(struct vsf_session* p_sess)
     {
       die("SSL: could not set cipher list");
     }
+    if (tunable_ssl_ciphers_tlsv13 &&
+        SSL_CTX_set_ciphersuites(p_ctx, tunable_ssl_ciphers_tlsv13) != 1)
+    {
+      die("SSL: could not set TLS v1.3 cipher list");
+    }
     if (RAND_status() != 1)
     {
       die("SSL: RNG is not seeded");

@@ -144,6 +144,7 @@ extern const char* tunable_email_password_file;
 extern const char* tunable_rsa_cert_file;
 extern const char* tunable_dsa_cert_file;
 extern const char* tunable_ssl_ciphers;
+extern const char* tunable_ssl_ciphers_tlsv13;
 extern const char* tunable_rsa_private_key_file;
 extern const char* tunable_dsa_private_key_file;
 extern const char* tunable_ca_certs_file;
